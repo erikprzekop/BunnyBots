@@ -8,16 +8,11 @@ import robocode.AdvancedRobot;
 import robocode.HitByBulletEvent;
 import robocode.HitRobotEvent;
 import robocode.HitWallEvent;
-import robocode.MoveCompleteCondition;
-import robocode.Rules;
 import robocode.ScannedRobotEvent;
-import robocode.TurnCompleteCondition;
-import robocode.util.Utils;
 
 public class SnuggleBunny extends AdvancedRobot {
 	private static final int DEFAULT_DISTANCE = 500;
 	int turnDirection = 1;
-	int dist = 25;
 	boolean movingForward;
 	int count = 0; // Keeps track of how long we've
 	// been searching for our target
@@ -67,7 +62,7 @@ public class SnuggleBunny extends AdvancedRobot {
 	public void onScannedRobot(ScannedRobotEvent e) {
 
 		  // Stay at right angles to the opponent
-	      setTurnRight(e.getBearing()+90-30*movementDirection);
+//	      setTurnRight(e.getBearing()+90-30*movementDirection);
 	         
 	     // If the bot has small energy drop,
 	    // assume it fired
@@ -77,15 +72,35 @@ public class SnuggleBunny extends AdvancedRobot {
 	        changeInEnergy<=3) {
 	         // Dodge!
 	         movementDirection =-movementDirection;
-	         setAhead((e.getDistance()/4+25)*movementDirection);
+	         setAhead(((e.getDistance()/2)+25)*movementDirection);
 	     }
-	    // When a bot is spotted,
-	    // sweep the gun and radar
-	    gunDirection = -gunDirection;
-	    setTurnGunRight(99999*gunDirection);
+
+	    // Calculate exact location of the robot
+		double absoluteBearing = getHeading() + e.getBearing();
+		double bearingFromGun = normalRelativeAngleDegrees(absoluteBearing - getGunHeading());
+		// If it's close enough, fire!
+		if (Math.abs(bearingFromGun) <= 3 && e.getDistance() < 400) {
+			setTurnGunRight(bearingFromGun);
+			// We check gun heat here, because calling fire()
+			// uses a turn, which could cause us to lose track
+			// of the other robot.
+			if (getGunHeat() == 0) {
+				setFire(Math.min(3 - Math.abs(bearingFromGun), getEnergy() - .1));
+			}
+		} // otherwise just set the gun to turn.
+		// Note:  This will have no effect until we call scan()
+		else {
+			setTurnGunRight(bearingFromGun);
+		}
+		// Generates another scan event if we see a robot.
+		// We only need to call this if the gun (and therefore radar)
+		// are not turning.  Otherwise, scan is called automatically.
+		if (bearingFromGun == 0) {
+			scan();
+		}
 	    
 	    // Fire directly at target
-	    fire ( 2 ) ;
+	    setFire(2) ;
 	    
 	    // Track the energy level
 	    previousEnergy = e.getEnergy();
@@ -102,21 +117,21 @@ public class SnuggleBunny extends AdvancedRobot {
 		// Determine a shot that won't kill the robot...
 		// We want to ram him instead for bonus points
 		if (e.getEnergy() > 16) {
-			fire(3);
+			setFire(3);
 		} else if (e.getEnergy() > 10) {
-			fire(2);
+			setFire(2);
 		} else if (e.getEnergy() > 4) {
-			fire(1);
+			setFire(1);
 		} else if (e.getEnergy() > 2) {
-			fire(.5);
+			setFire(.5);
 		} else if (e.getEnergy() > .4) {
-			fire(.1);
+			setFire(.1);
 		}
 
 	}
 
 	public void onHitByBullet(HitByBulletEvent e) {
-		turnLeft(90 - e.getBearing());
+		setTurnLeft(90 - e.getBearing());
 		reverseDirection();
 		
 	}
@@ -127,11 +142,12 @@ public class SnuggleBunny extends AdvancedRobot {
 	}
 
 	public void reverseDirection() {
+		double rand = Math.random();
 		if (movingForward) {
-			setBack(DEFAULT_DISTANCE);
+			setBack(DEFAULT_DISTANCE * rand);
 			movingForward = false;
 		} else {
-			setAhead(DEFAULT_DISTANCE);
+			setAhead(DEFAULT_DISTANCE * rand);
 			movingForward = true;
 		}
 	}
