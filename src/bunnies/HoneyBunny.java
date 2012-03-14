@@ -4,13 +4,12 @@ import static robocode.util.Utils.normalRelativeAngleDegrees;
 
 import java.awt.Color;
 
-import robocode.AdvancedRobot;
 import robocode.HitByBulletEvent;
-import robocode.HitRobotEvent;
 import robocode.HitWallEvent;
 import robocode.ScannedRobotEvent;
+import robocode.TeamRobot;
 
-public class HoneyBunny extends AdvancedRobot {
+public class HoneyBunny extends TeamRobot {
 	private static final int DEFAULT_DISTANCE = 500;
 	int turnDirection = 1;
 	boolean movingForward;
@@ -60,38 +59,42 @@ public class HoneyBunny extends AdvancedRobot {
 	}
 
 	public void onScannedRobot(ScannedRobotEvent e) {
-
+		// Don't fire on teammates
+		if (isTeammate(e.getName())) {
+			return;
+		}
 		// Calculate exact location of the robot
-				double absoluteBearing = getHeading() + e.getBearing();
-				double bearingFromGun = normalRelativeAngleDegrees(absoluteBearing - getGunHeading());
+		double absoluteBearing = getHeading() + e.getBearing();
+		double bearingFromGun = normalRelativeAngleDegrees(absoluteBearing
+				- getGunHeading());
 
-				// If it's close enough, fire!
-				if (Math.abs(bearingFromGun) <= 3) {
-					turnGunRight(bearingFromGun);
-					// We check gun heat here, because calling fire()
-					// uses a turn, which could cause us to lose track
-					// of the other robot.
-					if (getGunHeat() == 0) {
-						fire(Math.min(3 - Math.abs(bearingFromGun), getEnergy() - .1));
-					}
-				} // otherwise just set the gun to turn.
-				// Note:  This will have no effect until we call scan()
-				else {
-					turnGunRight(bearingFromGun);
-				}
-				// Generates another scan event if we see a robot.
-				// We only need to call this if the gun (and therefore radar)
-				// are not turning.  Otherwise, scan is called automatically.
-				if (bearingFromGun == 0) {
-					scan();
-				}
+		// If it's close enough, fire!
+		if (Math.abs(bearingFromGun) <= 3) {
+			turnGunRight(bearingFromGun);
+			// We check gun heat here, because calling fire()
+			// uses a turn, which could cause us to lose track
+			// of the other robot.
+			if (getGunHeat() == 0) {
+				fire(Math.min(3 - Math.abs(bearingFromGun), getEnergy() - .1));
+			}
+		} // otherwise just set the gun to turn.
+			// Note: This will have no effect until we call scan()
+		else {
+			turnGunRight(bearingFromGun);
+		}
+		// Generates another scan event if we see a robot.
+		// We only need to call this if the gun (and therefore radar)
+		// are not turning. Otherwise, scan is called automatically.
+		if (bearingFromGun == 0) {
+			scan();
+		}
 
 	}
 
 	public void onHitByBullet(HitByBulletEvent e) {
 		setTurnLeft(23 - e.getBearing());
 		reverseDirection();
-		
+
 	}
 
 	public void onHitWall(HitWallEvent event) {
