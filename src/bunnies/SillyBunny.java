@@ -9,7 +9,7 @@ import robocode.HitWallEvent;
 import robocode.ScannedRobotEvent;
 import robocode.TeamRobot;
 
-public class HoneyBunny extends TeamRobot {
+public class SillyBunny extends TeamRobot {
 	private static final int DEFAULT_DISTANCE = 500;
 	int turnDirection = 1;
 	boolean movingForward;
@@ -24,7 +24,7 @@ public class HoneyBunny extends TeamRobot {
 
 	public void run() {
 		// Set colors
-		setBodyColor(new Color(100, 200, 50));
+		setBodyColor(new Color(33, 33, 33));
 		setGunColor(new Color(0, 150, 50));
 		setRadarColor(new Color(0, 100, 100));
 		setBulletColor(new Color(255, 255, 100));
@@ -63,6 +63,9 @@ public class HoneyBunny extends TeamRobot {
 		if (isTeammate(e.getName())) {
 			return;
 		}
+		
+		dodgeBullet(e);
+		
 		// Calculate exact location of the robot
 		double absoluteBearing = getHeading() + e.getBearing();
 		double bearingFromGun = normalRelativeAngleDegrees(absoluteBearing
@@ -90,6 +93,25 @@ public class HoneyBunny extends TeamRobot {
 		}
 
 	}
+	
+	public void dodgeBullet(ScannedRobotEvent e){
+        
+	     // If the bot has small energy drop,
+	    // assume it fired
+	    double changeInEnergy =
+	      previousEnergy-e.getEnergy();
+	    if (changeInEnergy>0 &&
+	        changeInEnergy<=3) {
+	         // Dodge!
+	         movementDirection =
+	          -movementDirection;
+	         setAhead((e.getDistance()/4+25)*movementDirection);
+	     }
+	   
+	    
+	    // Track the energy level
+	    previousEnergy = e.getEnergy();
+}
 
 	public void onHitByBullet(HitByBulletEvent e) {
 		setTurnLeft(23 - e.getBearing());
