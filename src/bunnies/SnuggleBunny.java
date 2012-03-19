@@ -54,8 +54,7 @@ public class SnuggleBunny extends TeamRobot {
 			return;
 		}
 
-		// If the bot has small energy drop,
-		// assume it fired
+		// If the bot has small energy drop, assume it fired
 		double changeInEnergy = previousEnergy - e.getEnergy();
 		if (changeInEnergy > 0 && changeInEnergy <= 3) {
 			// Dodge!
