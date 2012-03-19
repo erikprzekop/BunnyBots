@@ -14,53 +14,42 @@ public class SnuggleBunny extends TeamRobot {
 	private static final int DEFAULT_DISTANCE = 500;
 	int turnDirection = 1;
 	boolean movingForward;
-	int count = 0; // Keeps track of how long we've
-	// been searching for our target
-	double gunTurnAmt; // How much to turn our gun when searching
-	String trackName; // Name of the robot we're currently tracking
+	int numberOfSearches = 0; 
+	double howMuchToTurnGunWhenSearching;  
+	String robotCurrentlyBeingTracked; 
 
 	double previousEnergy = 100;
 	int movementDirection = 1;
 	int gunDirection = 1;
 
 	public void run() {
-		// Set colors
-		setBodyColor(new Color(0, 200, 0));
-		setGunColor(new Color(0, 150, 50));
-		setRadarColor(new Color(0, 100, 100));
-		setBulletColor(new Color(255, 255, 100));
-		setScanColor(new Color(255, 200, 200));
+		setBodyColor(Color.pink);
+		setGunColor(Color.white);
+		setRadarColor(Color.black);
+		setBulletColor(Color.pink);
+		setScanColor(Color.pink);
 
-		// Prepare gun
-		trackName = null; // Initialize to not tracking anyone
-		setAdjustGunForRobotTurn(true); // Keep the gun still when we turn
-		gunTurnAmt = 10; // Initialize gunTurn to 10
+		robotCurrentlyBeingTracked = null;
+		setAdjustGunForRobotTurn(true); 
+		howMuchToTurnGunWhenSearching = 10;
 
-		// Loop forever
 		while (true) {
-			// turn the Gun (looks for enemy)
-			turnGunRight(gunTurnAmt);
-			// Keep track of how long we've been looking
-			count++;
-			// If we've haven't seen our target for 2 turns, look left
-			if (count > 2) {
-				gunTurnAmt = -10;
+			turnGunRight(howMuchToTurnGunWhenSearching);
+			numberOfSearches++;
+			if (numberOfSearches > 2) {
+				howMuchToTurnGunWhenSearching = -10;
 			}
-			// If we still haven't seen our target for 5 turns, look right
-			if (count > 5) {
-				gunTurnAmt = 10;
+			if (numberOfSearches > 5) {
+				howMuchToTurnGunWhenSearching = 10;
 			}
-			// If we *still* haven't seen our target after 10 turns, find
-			// another target
-			if (count > 11) {
-				trackName = null;
+			if (numberOfSearches > 11) {
+				robotCurrentlyBeingTracked = null;
 			}
 		}
 
 	}
 
 	public void onScannedRobot(ScannedRobotEvent e) {
-		// Don't fire on teammates
 		if (isTeammate(e.getName())) {
 			return;
 		}
@@ -88,22 +77,15 @@ public class SnuggleBunny extends TeamRobot {
 				setFire(Math
 						.min(3 - Math.abs(bearingFromGun), getEnergy() - .1));
 			}
-		} // otherwise just set the gun to turn.
-			// Note: This will have no effect until we call scan()
+		} 
 		else {
 			setTurnGunRight(bearingFromGun);
 		}
-		// Generates another scan event if we see a robot.
-		// We only need to call this if the gun (and therefore radar)
-		// are not turning. Otherwise, scan is called automatically.
 		if (bearingFromGun == 0) {
 			scan();
 		}
-
-		// Fire directly at target
 		setFire(2);
 
-		// Track the energy level
 		previousEnergy = e.getEnergy();
 	}
 
@@ -134,7 +116,6 @@ public class SnuggleBunny extends TeamRobot {
 	public void onHitByBullet(HitByBulletEvent e) {
 		setTurnLeft(80 - e.getBearing());
 		reverseDirection();
-
 	}
 
 	public void onHitWall(HitWallEvent event) {

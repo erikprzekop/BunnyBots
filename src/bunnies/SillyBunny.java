@@ -64,7 +64,7 @@ public class SillyBunny extends TeamRobot {
 			return;
 		}
 		
-		dodgeBullet(e);
+//		dodgeBullet(e);
 		
 		// Calculate exact location of the robot
 		double absoluteBearing = getHeading() + e.getBearing();
