@@ -1,6 +1,6 @@
 #Bunny robot team
 #Wed 14 Mar, 2012
-team.members=bunnies.SnuggleBunny,bunnies.SnuggleBunny,bunnies.HoneyBunny,bunnies.HoneyBunny
+team.members=bunnies.BruiserBunny,bunnies.SnuggleBunny,bunnies.HoneyBunny,bunnies.HoneyBunny
 team.author.name=Erik Przekop and Pete Murasky
 robocode.version=1.1.2
 team.webpage=
