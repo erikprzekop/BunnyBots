@@ -11,7 +11,7 @@ import robocode.ScannedRobotEvent;
 import robocode.TeamRobot;
 
 public class SnuggleBunny extends TeamRobot {
-	private static final int DEFAULT_DISTANCE = 500;
+	private static final int DEFAULT_DISTANCE = 650;
 	int turnDirection = 1;
 	boolean movingForward;
 	int numberOfSearches = 0; 
@@ -62,16 +62,11 @@ public class SnuggleBunny extends TeamRobot {
 			setAhead(((e.getDistance() / 2) + 25) * movementDirection);
 		}
 
-		// Calculate exact location of the robot
 		double absoluteBearing = getHeading() + e.getBearing();
 		double bearingFromGun = normalRelativeAngleDegrees(absoluteBearing
 				- getGunHeading());
-		// If it's close enough, fire!
 		if (Math.abs(bearingFromGun) <= 3 && e.getDistance() < 400) {
 			setTurnGunRight(bearingFromGun);
-			// We check gun heat here, because calling fire()
-			// uses a turn, which could cause us to lose track
-			// of the other robot.
 			if (getGunHeat() == 0) {
 				setFire(Math
 						.min(3 - Math.abs(bearingFromGun), getEnergy() - .1));
@@ -96,8 +91,6 @@ public class SnuggleBunny extends TeamRobot {
 		}
 		turnRight(e.getBearing());
 
-		// Determine a shot that won't kill the robot...
-		// We want to ram him instead for bonus points
 		if (e.getEnergy() > 16) {
 			setFire(3);
 		} else if (e.getEnergy() > 10) {
